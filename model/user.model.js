@@ -1,12 +1,14 @@
 const mongoose=require('mongoose')
+const uniqueValidator=require('mongoose-unique-validator');
+
 
 const Schema=mongoose.Schema;
 
 
 const userSchema= new Schema({
- userName:{
+ username:{
      type:String,
-     required:true,
+     required:[true,'An username is required'],
      unique:true,
      minlength:3,
      trim:true,
@@ -17,20 +19,18 @@ const userSchema= new Schema({
 },
 password:{
 type:String,
-required:true,
-minlength:6,
-maxlength:1000
+required:[true,'A password is required'],
+minlength:6
 },
 email:{
 type:String,
-required:true;
+required:[true,'An email address is required'],
 unique:true,
 match: [/\S+@\S+\.\S+/, 'is invalid'],
 index: true
-
 }
 
 },{timestamps:true});
-
-let UserVarification=mongoose.model('UserVarification',userSchema);
-module.exports=UserVarification;
+userSchema.plugin(uniqueValidator,{message:"is already taken try a different"});
+let User=mongoose.model('User',userSchema);
+module.exports=User;
