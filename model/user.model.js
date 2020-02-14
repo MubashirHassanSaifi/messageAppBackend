@@ -5,7 +5,7 @@ const uniqueValidator=require('mongoose-unique-validator');
 const Schema=mongoose.Schema;
 
 
-const userSchema= new Schema({
+const userSchema= new Schema(useCreateIndex:true,useNewUrlParser:true,useUnifiedTopology:true{
  username:{
      type:String,
      required:[true,'An username is required'],
@@ -17,18 +17,19 @@ const userSchema= new Schema({
     
 
 },
+email:{
+    type:String,
+    required:[true,'An email address is required'],
+    unique:true,
+    match: [/\S+@\S+\.\S+/, 'is invalid'],
+    index: true
+    },
 password:{
 type:String,
 required:[true,'A password is required'],
 minlength:6
-},
-email:{
-type:String,
-required:[true,'An email address is required'],
-unique:true,
-match: [/\S+@\S+\.\S+/, 'is invalid'],
-index: true
 }
+
 
 },{timestamps:true});
 userSchema.plugin(uniqueValidator,{message:"is already taken try a different"});

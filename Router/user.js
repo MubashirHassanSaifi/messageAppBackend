@@ -26,7 +26,11 @@ const signInSchema=joi.object({
  password:joi.string().min(6).required(),
 })
 
-
+router.route('/').get((req,res)=>{
+   User.find()
+   .then(user=>res.status(200).json(user))
+   .catch(err=>res.status(400).json("err",err));
+});
 
 
 //-----------------------------------------------User sign-up------------------------------------
@@ -40,8 +44,9 @@ const signInSchema=joi.object({
     }
  
   const username =req.body.username;
-    const password=req.body.password;
-    const email=req.body.email;
+  const email=req.body.email; 
+  const password=req.body.password;
+    
     // validate username
      const userNameExist = await User.findOne({username:username});
      if(userNameExist){
@@ -62,8 +67,9 @@ const signInSchema=joi.object({
 const newUser = new User(
      {
          username:username,
-         password:hashPassword,
          email:email,
+         password:hashPassword
+        
         }
  );
  const userSave =newUser.save();
@@ -105,7 +111,7 @@ try{
  const verifyPass= await bcrypt.compare(password,srchUser.password);
 if(verifyPass){
  const token =jwt.sign({
-   userID:srchUser._id,       //the database id 
+   _id:srchUser._id,       //the database id 
    username:srchUser.username
   },
   process.env.TOKEN,
@@ -114,26 +120,33 @@ if(verifyPass){
 }
   
   );
+ res.header('auth-token',token).send(
+   {
+     user:{
+     id:srchUser._id,
+     name:srchUser.username,
+     email:srchUser.email
+          },token
+  });
+  
 
-  res.json({
-    message:"success",
-     token:token
-  })
-}
+
  }
- catch{
- res.status(500);
+}
+ catch(err){
+ res.status(500).send(err);
  }
 });
 
-router.route('/auth').get(check_Auth , async(res ,req,next)=>{
+router.route('/auth').get(check_Auth , async(req,res)=>{
     
-  const user = await User.find();
+  const user = await User.findOne({_id:req.users._id});
+  
   if(user){
-  return {
-    username:user.username,
+  res.send({
+    userName:user.username,
     email:user.email
-  }  
+  })
   }
   else 
   res.status(400).send("error");
